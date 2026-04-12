@@ -14,7 +14,7 @@ router = APIRouter()
 async def extract_medication(
     request: Request,
     image: UploadFile = File(...),
-    _: None = Depends(verify_api_key),
+    _: str | None = Depends(verify_api_key),
 ):
     raw = await image.read()
     content_type = image.content_type or ""

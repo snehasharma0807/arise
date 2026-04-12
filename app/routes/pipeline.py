@@ -1,7 +1,9 @@
+import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile, File
 from app.auth import verify_api_key
 from app.claude_client import _call_claude, _safe_parse_json
+from app.database import supabase
 from app.image_utils import validate_and_encode_image
 from app.prompts import EXTRACT_SYSTEM_PROMPT, build_analyze_prompt
 from app.rate_limit import limiter, RATE_LIMIT_STRING
@@ -13,6 +15,7 @@ from app.schemas import (
     RiskInfo,
 )
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -22,7 +25,7 @@ async def pipeline(
     request: Request,
     image: UploadFile = File(...),
     user_question: Optional[str] = Form(None),
-    _: None = Depends(verify_api_key),
+    user_id: str | None = Depends(verify_api_key),
 ):
     # Validate user_question length
     if user_question and len(user_question) > 500:
@@ -73,4 +76,28 @@ async def pipeline(
         caregiver_card=CaregiverCard(**analyze_data["caregiver_card"]),
     )
 
-    return PipelineResponse(extraction=extraction, analysis=analysis)
+    result = PipelineResponse(extraction=extraction, analysis=analysis)
+
+    # Persist to Supabase if configured
+    if supabase is not None:
+        try:
+            supabase.table("medication_history").insert({
+                "user_id": user_id,
+                "medication_name": extraction.medication_name,
+                "dosage": extraction.dosage,
+                "form": extraction.form,
+                "confidence": extraction.confidence,
+                "explanation": analysis.explanation,
+                "risk_level": analysis.risk.level,
+                "risk_explanation": analysis.risk.explanation,
+                "risk_recommendation": analysis.risk.recommendation,
+                "caregiver_medication": analysis.caregiver_card.medication,
+                "caregiver_purpose": analysis.caregiver_card.purpose,
+                "caregiver_how_to_take": analysis.caregiver_card.how_to_take,
+                "caregiver_key_warning": analysis.caregiver_card.key_warning,
+                "user_question": user_question,
+            }).execute()
+        except Exception:
+            logger.exception("Failed to persist pipeline result to Supabase")
+
+    return result

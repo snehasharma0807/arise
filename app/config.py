@@ -15,3 +15,8 @@ RATE_LIMIT_PER_HOUR: str = os.getenv("RATE_LIMIT_PER_HOUR", "30")
 RATE_LIMIT_PER_DAY: str = os.getenv("RATE_LIMIT_PER_DAY", "100")
 
 ALLOWED_MIME_TYPES: set = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+
+# Supabase
+SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
