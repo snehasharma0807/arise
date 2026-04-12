@@ -1,0 +1,76 @@
+from typing import Optional
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile, File
+from app.auth import verify_api_key
+from app.claude_client import _call_claude, _safe_parse_json
+from app.image_utils import validate_and_encode_image
+from app.prompts import EXTRACT_SYSTEM_PROMPT, build_analyze_prompt
+from app.rate_limit import limiter, RATE_LIMIT_STRING
+from app.schemas import (
+    CaregiverCard,
+    CombinedResponse,
+    MedicationExtraction,
+    PipelineResponse,
+    RiskInfo,
+)
+
+router = APIRouter()
+
+
+@router.post("/pipeline", response_model=PipelineResponse)
+@limiter.limit(RATE_LIMIT_STRING)
+async def pipeline(
+    request: Request,
+    image: UploadFile = File(...),
+    user_question: Optional[str] = Form(None),
+    _: None = Depends(verify_api_key),
+):
+    # Validate user_question length
+    if user_question and len(user_question) > 500:
+        raise HTTPException(
+            status_code=400,
+            detail="user_question must not exceed 500 characters.",
+        )
+
+    # --- Step 1: Extract medication info from image ---
+    raw = await image.read()
+    content_type = image.content_type or ""
+    b64_image, media_type = validate_and_encode_image(raw, content_type)
+
+    extract_content = [
+        {
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": media_type,
+                "data": b64_image,
+            },
+        },
+        {
+            "type": "text",
+            "text": "Please extract the medication information from this image.",
+        },
+    ]
+
+    extract_raw = _call_claude(EXTRACT_SYSTEM_PROMPT, extract_content, max_tokens=256)
+    extract_data = _safe_parse_json(extract_raw)
+    extraction = MedicationExtraction(**extract_data)
+
+    # --- Step 2: Analyze extracted medication ---
+    system_prompt = build_analyze_prompt(
+        extraction.medication_name, user_question or ""
+    )
+    analyze_content = [
+        {"type": "text", "text": "Please provide the medication analysis."}
+    ]
+
+    analyze_raw = _call_claude(system_prompt, analyze_content, max_tokens=512)
+    analyze_data = _safe_parse_json(analyze_raw)
+
+    analysis = CombinedResponse(
+        medication_name=analyze_data["medication_name"],
+        explanation=analyze_data["explanation"],
+        risk=RiskInfo(**analyze_data["risk"]),
+        caregiver_card=CaregiverCard(**analyze_data["caregiver_card"]),
+    )
+
+    return PipelineResponse(extraction=extraction, analysis=analysis)
