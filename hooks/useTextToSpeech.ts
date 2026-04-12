@@ -16,7 +16,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Requires these env vars in .env.local:
  *   NEXT_PUBLIC_SUPABASE_URL
- *   NEXT_PUBLIC_SUPABASE_ANON_KEY
+ *   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -75,10 +75,10 @@ function getTTSEndpoint(): string {
 }
 
 function getAnonKey(): string {
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!key) {
     throw new Error(
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY is not set. Check your .env.local file."
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is not set. Check your .env.local file."
     );
   }
   return key;

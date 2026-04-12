@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import jwt
 from fastapi import Header, HTTPException, Request
 from app.config import APP_API_KEY, SUPABASE_JWT_SECRET
@@ -40,3 +41,24 @@ def verify_api_key(
     if x_api_key == APP_API_KEY:
         return None
     raise HTTPException(status_code=401, detail="Invalid API key.")
+=======
+from typing import Optional
+
+from fastapi import Header, HTTPException
+from app.config import APP_API_KEY
+
+
+def verify_api_key(x_api_key: Optional[str] = Header(None, alias="X-API-Key")) -> None:
+    """Validate the X-API-Key header.
+
+    Dev mode: if APP_API_KEY is not configured on the server, all requests are
+    allowed regardless of whether the header is present.
+
+    Production: the header must be present and match APP_API_KEY exactly.
+    """
+    if not APP_API_KEY:
+        # Dev mode: no key configured on the server — allow all requests.
+        return
+    if x_api_key != APP_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key.")
+>>>>>>> 7a40a2b (connecting my + ethan work)
