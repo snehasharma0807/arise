@@ -43,12 +43,12 @@ const MockAudioConstructor = jest.fn().mockImplementation((src?: string) => {
     ontimeupdate: null,
     pause: jest.fn(),
     load: jest.fn(),
-    // play() resolves then fires onplay — mirrors real HTMLAudioElement behaviour
-    play: jest.fn().mockImplementation(() =>
-      Promise.resolve().then(() => {
-        instance.onplay?.();
-      })
-    ),
+    // play() fires onplay synchronously then resolves — mirrors real HTMLAudioElement
+    // behaviour where the play event fires before the returned promise settles.
+    play: jest.fn().mockImplementation(() => {
+      instance.onplay?.();
+      return Promise.resolve();
+    }),
   };
   _lastAudioInstance = instance;
   return instance;
