@@ -6,6 +6,7 @@ from app.claude_client import _call_claude, _safe_parse_json
 from app.database import supabase
 from app.image_utils import validate_and_encode_image
 from app.prompts import EXTRACT_SYSTEM_PROMPT, build_analyze_prompt
+from app.openfda import fetch_fda_label, format_fda_context
 from app.rate_limit import limiter, RATE_LIMIT_STRING
 from app.schemas import (
     CaregiverCard,
@@ -58,9 +59,12 @@ async def pipeline(
     extract_data = _safe_parse_json(extract_raw)
     extraction = MedicationExtraction(**extract_data)
 
-    # --- Step 2: Analyze extracted medication ---
+    # --- Step 2: Analyze extracted medication (augmented with FDA label data) ---
+    fda_data = fetch_fda_label(extraction.medication_name)
+    fda_context = format_fda_context(fda_data)
+
     system_prompt = build_analyze_prompt(
-        extraction.medication_name, user_question or ""
+        extraction.medication_name, user_question or "", fda_context
     )
     analyze_content = [
         {"type": "text", "text": "Please provide the medication analysis."}

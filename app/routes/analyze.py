@@ -4,6 +4,7 @@ from app.auth import verify_api_key
 from app.claude_client import _call_claude, _safe_parse_json
 from app.database import supabase
 from app.prompts import build_analyze_prompt
+from app.openfda import fetch_fda_label, format_fda_context
 from app.rate_limit import limiter, RATE_LIMIT_STRING
 from app.schemas import CombinedRequest, CombinedResponse, RiskInfo, CaregiverCard
 
@@ -18,8 +19,11 @@ async def analyze_medication(
     body: CombinedRequest,
     user_id: str | None = Depends(verify_api_key),
 ):
+    fda_data = fetch_fda_label(body.medication_name)
+    fda_context = format_fda_context(fda_data)
+
     system_prompt = build_analyze_prompt(
-        body.medication_name, body.user_question or ""
+        body.medication_name, body.user_question or "", fda_context
     )
 
     user_content = [{"type": "text", "text": "Please provide the medication analysis."}]
