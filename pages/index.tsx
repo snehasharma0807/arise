@@ -3,6 +3,7 @@ import TopAppBar from "@/components/layout/TopAppBar";
 import BottomNav from "@/components/layout/BottomNav";
 import { SpeechPlayer } from "@/components/SpeechPlayer";
 import { useFinalVoiceOutput } from "@/hooks/useFinalVoiceOutput";
+import { useMedications } from "@/context/MedicationsContext";
 import { scanMedication, analyzeMedication } from "@/lib/api";
 import type { PipelineResponse, AnalyzeResponse } from "@/lib/api";
 import type { SafetyLevel } from "@/lib/elevenlabs";
@@ -46,8 +47,12 @@ export default function MyMeds() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentMedication, setCurrentMedication] = useState<string | null>(null);
 
+  const [isListening, setIsListening] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isLoading = isScanning || isAnalyzing;
+
+  const { addMedication } = useMedications();
 
   // Full voice pipeline — auto-plays after scan/analyze
   const { speak, status: voiceStatus, error: voiceError } = useFinalVoiceOutput();
@@ -70,6 +75,8 @@ export default function MyMeds() {
     try {
       const data = await scanMedication(file);
       setCurrentMedication(data.extraction.medication_name);
+      // Add to shared medication list (My Context + Schedule)
+      addMedication(data);
       setMessages((prev) => [
         ...prev,
         { role: "arise", text: data.analysis.explanation, scanResult: data },
@@ -147,6 +154,9 @@ export default function MyMeds() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognition = new SpeechRecognitionCtor() as any;
     recognition.lang = "en-US";
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       setInputText(event.results[0][0].transcript as string);
@@ -167,6 +177,19 @@ export default function MyMeds() {
 
   return (
     <div className="bg-surface text-on-surface min-h-screen flex flex-col">
+      {/* Listening indicator */}
+      {isListening && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-primary text-white flex items-center justify-center gap-3 py-3 text-sm font-medium">
+          <span
+            className="material-symbols-outlined animate-pulse"
+            style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+          >
+            mic
+          </span>
+          Listening… speak now
+        </div>
+      )}
+
       {/* Hidden file input — capture="environment" opens camera on mobile */}
       <input
         ref={fileInputRef}
