@@ -15,6 +15,9 @@ def verify_api_key(
 
     Returns the Supabase user_id if a valid JWT was provided, else None.
     Raises HTTP 401 if neither form of auth passes.
+
+    Dev mode: if APP_API_KEY is not configured and no JWT secret is set,
+    all requests are allowed without any header.
     """
     # --- Supabase JWT path ---
     if authorization and authorization.startswith("Bearer "):
@@ -35,7 +38,7 @@ def verify_api_key(
 
     # --- X-API-Key path ---
     if not APP_API_KEY:
-        # Dev mode: no key configured, allow all requests
+        # Dev mode: no key configured on the server — allow all requests.
         return None
     if x_api_key == APP_API_KEY:
         return None

@@ -48,7 +48,17 @@ interface TTSRequest {
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const ARIA_VOICE_ID = "9BWtsMINqrJLrRacOk9x";
+/** Adam — deep, authoritative: used for medication explanations */
+const ADAM_VOICE_ID = "pNInz6obpgDQGcFmaJgB";
+/** Rachel — calm, warm: used for follow-up / safety responses */
+const RACHEL_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
+
+/** Default voice per preset — can still be overridden by passing voiceId in request */
+const PRESET_VOICE_IDS: Record<"explanation" | "followup", string> = {
+  explanation: ADAM_VOICE_ID,
+  followup: RACHEL_VOICE_ID,
+};
+
 const ELEVENLABS_MODEL = "eleven_turbo_v2_5";
 const OUTPUT_FORMAT = "mp3_44100_128";
 
@@ -116,7 +126,7 @@ serve(async (req: Request) => {
   }
 
   const resolvedVoiceId =
-    voiceId ?? Deno.env.get("ELEVENLABS_VOICE_ID") ?? ARIA_VOICE_ID;
+    voiceId ?? Deno.env.get("ELEVENLABS_VOICE_ID") ?? PRESET_VOICE_IDS[preset];
 
   const voiceSettings =
     VOICE_PRESETS[preset] ?? VOICE_PRESETS.explanation;

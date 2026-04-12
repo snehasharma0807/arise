@@ -2,8 +2,8 @@
  * ElevenLabs constants, types, and voice configuration for Arise.
  *
  * Voice choice rationale:
- *   Aria  — warm, calm, clear enunciation. Best for elderly listeners.
- *   Rachel — neutral and steady, good fallback for follow-up responses.
+ *   Adam   — deep, authoritative, clear. Used for medication explanations.
+ *   Rachel — calm, warm, neutral. Used for follow-up / safety responses.
  *
  * Teammate interface:
  *   Your Claude-integration teammate passes plain `text` strings here.
@@ -15,9 +15,9 @@
 // ---------------------------------------------------------------------------
 
 export const ARISE_VOICES = {
-  /** Primary voice — warm and calm, used for medication explanations */
-  aria: "9BWtsMINqrJLrRacOk9x",
-  /** Secondary voice — neutral, used for caution/danger follow-up responses */
+  /** Primary voice — deep and authoritative, used for medication explanations */
+  adam: "pNInz6obpgDQGcFmaJgB",
+  /** Secondary voice — calm and warm, used for caution/danger follow-up responses */
   rachel: "21m00Tcm4TlvDq8ikWAM",
 } as const;
 

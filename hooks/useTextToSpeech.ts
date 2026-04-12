@@ -174,9 +174,6 @@ export function useTextToSpeech(
           );
         }
 
-        // Collect the full stream into a blob for reliable <audio> playback.
-        // For the short 2–3 sentence responses Arise generates, this is
-        // imperceptibly faster than true MediaSource streaming and much simpler.
         const audioBlob = await response.blob();
 
         // Check if we were aborted while waiting for the blob
@@ -200,8 +197,6 @@ export function useTextToSpeech(
         };
 
         audio.onpause = () => {
-          // onpause fires both for user-initiated pauses AND when the track ends
-          // before onended fires, so only set "paused" if we're not at the end.
           if (!audio.ended) setStatus("paused");
         };
 
@@ -222,7 +217,6 @@ export function useTextToSpeech(
         await audio.play();
       } catch (err) {
         if ((err as Error).name === "AbortError") {
-          // Intentionally cancelled — reset quietly
           setStatus("idle");
           return;
         }
@@ -247,7 +241,6 @@ export function useTextToSpeech(
   const pause = useCallback(() => {
     if (audioRef.current && status === "playing") {
       audioRef.current.pause();
-      // Status is set by the onpause event handler above
     }
   }, [status]);
 

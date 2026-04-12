@@ -38,7 +38,7 @@ NEXT_PUBLIC_APP_API_KEY=dev-key               # any string in dev; match APP_API
 
 # Supabase (for Edge Functions / voice pipeline)
 NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
 ---
@@ -245,7 +245,7 @@ npm run dev
 ## Checklist before demo
 
 - [ ] `NEXT_PUBLIC_API_URL` points to running FastAPI instance
-- [ ] `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set
+- [ ] `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set
 - [ ] `ELEVENLABS_API_KEY` is set as a Supabase secret (`supabase secrets set …`)
 - [ ] `ANTHROPIC_API_KEY` is set in both FastAPI `.env` AND as a Supabase secret
 - [ ] FastAPI is running and `GET /health` returns `{"status":"ok"}`
