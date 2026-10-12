@@ -21,7 +21,7 @@ export default function TopAppBar() {
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-[#416448] dark:text-emerald-400 text-3xl">spa</span>
           <h1 className="font-serif text-[1.75rem] leading-tight tracking-tight text-[#416448] dark:text-emerald-400">
-            {greeting}, {USER_FIRST_NAME} 🌿
+            {greeting}, {USER_FIRST_NAME} 🚀
           </h1>
         </div>
       </div>
