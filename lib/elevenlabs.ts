@@ -16,6 +16,8 @@
 
 export const ARISE_VOICES = {
   /** Primary voice — deep and authoritative, used for medication explanations */
+  aria: "pNInz6obpgDQGcFmaJgB",
+  /** Backward-compatible alias for the same primary explanation voice */
   adam: "pNInz6obpgDQGcFmaJgB",
   /** Secondary voice — calm and warm, used for caution/danger follow-up responses */
   rachel: "21m00Tcm4TlvDq8ikWAM",

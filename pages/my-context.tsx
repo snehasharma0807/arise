@@ -3,6 +3,7 @@ import TopAppBar from "@/components/layout/TopAppBar";
 import BottomNav from "@/components/layout/BottomNav";
 import { useMedications } from "@/context/MedicationsContext";
 import type { ScannedMedication } from "@/context/MedicationsContext";
+import { USER_FIRST_NAME } from "@/lib/user";
 
 // ── Add Medication Modal ───────────────────────────────────────────────────
 
@@ -292,7 +293,7 @@ export default function MyContext() {
               </div>
               <p className="text-center font-body text-sm text-on-surface-variant">
                 {showPlaceholders
-                  ? "Consistency this week is looking healthy, Margaret."
+                  ? `Consistency this week is looking healthy, ${USER_FIRST_NAME}.`
                   : `${checkedMeds} of ${totalMeds} taken today.`}
               </p>
             </div>
